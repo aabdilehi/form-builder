@@ -3,6 +3,7 @@
  * Source code adapted for this template.
  */
 import { z } from 'zod'
+import { Resend } from 'resend';
 
 const ResendErrorSchema = z.union([
   z.object({
@@ -33,19 +34,12 @@ export async function sendEmail(options: SendEmailOptions) {
   const from = 'onboarding@resend.dev'
   const email = { from, ...options }
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(email),
-  })
+  const resend = new Resend(process.env.RESEND_API_KEY);
+  const { data, error } = await resend.emails.send(email);
 
-  const data = await response.json()
   const parsedData = ResendSuccessSchema.safeParse(data)
 
-  if (response.ok && parsedData.success) {
+  if (!error && parsedData.success) {
     return { status: 'success', data: parsedData } as const
   } else {
     const parseResult = ResendErrorSchema.safeParse(data)
@@ -53,7 +47,7 @@ export async function sendEmail(options: SendEmailOptions) {
       console.error(parseResult.data)
       throw new Error('Unable to send email.')
     } else {
-      console.error(data)
+      console.error(error)
       throw new Error('Unable to send email.')
     }
   }
