@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+model Questionnaire {
+  id                                              String               @id
+  title                                           String
+  description                                     String?
+  userId                                          String
+  date                                            DateTime             @default(now())
+  visibility                                      String               @default("public")
+  status                                          String               @default("open")
+  responseType                                    String               @default("anyone")
+  questions                                       Question[]
+  responses                                       Response[]
+  user                                            user       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  ResponseTypes                                   ResponseTypes       @relation(fields: [responseType], references: [value], onDelete: Cascade, onUpdate: Cascade)
+  QuestionnaireStatus                             QuestionnaireStatus @relation(fields: [status], references: [value], onDelete: Cascade, onUpdate: Cascade)
+  Visiblity                                       Visibility @relation(fields: [visibility], references: [value], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model QuestionnaireStatus {
+  value        String          @id
+  questionnaire Questionnaire[]
+}
+
+model Question {
+  id              String    @id @default(uuid())
+  text            String
+  type            String
+  order           Int
+  questionnaireId String
+  questionnaire   Questionnaire        @relation(fields: [questionnaireId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  textInput       TextInputQuestion?
+  multipleChoice  MultipleChoiceQuestion?  
+  rangeInput      RangeInputQuestion?
+  numberInput     NumberInputQuestion?
+  responses       Response[]
+}
+
+model TextInputQuestion {
+  id          String    @id @default(uuid())
+  questionId  String    @unique
+  longForm    Boolean   @default(false)
+  maxChars    Int?      
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model MultipleChoiceQuestion {
+  id          String    @id @default(uuid())
+  questionId  String    @unique
+  maxSelect   Int?
+  question    Question  @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  answers     Answer[]
+}
+
+model RangeInputQuestion {
+  id        String    @id @default(uuid())
+  questionId String   @unique
+  min  Float?  @default(0)
+  max  Float?  @default(5)
+  steps Float? @default(1)
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model NumberInputQuestion {
+  id        String    @id @default(uuid())
+  questionId String   @unique
+  min  Float?  @default(0)
+  max  Float?  @default(5)
+  question  Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+
+model Answer {
+  id                   String   @id @default(uuid())
+  text                 String
+  multipleChoiceQuestionId String
+  multipleChoiceQuestion MultipleChoiceQuestion @relation(fields: [multipleChoiceQuestionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  responses            Response[]
+}
+
+model Response {
+  id              String    @id @default(uuid())
+  sessionId       String  // For registered users, userid. Else, generated UUID to track related answers.
+  questionnaireId String
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  questionId      String
+  question        Question @relation(fields: [questionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  answerId        String?
+  answer          Answer?  @relation(fields: [answerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  text            String?
+  number          Float?
+}
+
+model ResponseTypes {
+  value         String          @id
+  questionnaire Questionnaire[]
+}
+
+model Totp {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  // Required fields.
+  hash      String   @unique
+  attempts  Int      @default(0)
+  active    Boolean  @default(true)
+  expiresAt DateTime
+}
+
+model user {
+  id        String    @unique
+  email     String    @unique
+  username  String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  questionnaire Questionnaire[]
+}
+
+model Visibility {
+  value                                              String          @id
+  questionnaire Questionnaire[]
+}

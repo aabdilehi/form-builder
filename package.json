@@ -10,18 +10,28 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@prisma/client": "^5.9.1",
     "@remix-run/css-bundle": "^2.3.1",
     "@remix-run/express": "^2.3.1",
     "@remix-run/node": "^2.3.1",
     "@remix-run/react": "^2.3.1",
+    "@uidotdev/usehooks": "^2.4.1",
+    "chart.js": "^4.4.1",
     "compression": "^1.7.4",
     "cross-env": "^7.0.3",
     "express": "^4.18.2",
     "isbot": "^3.6.8",
     "morgan": "^1.10.0",
+    "prisma": "^5.9.1",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
-    "source-map-support": "^0.5.21"
+    "react-icons": "^5.0.1",
+    "remix-auth": "^3.6.0",
+    "remix-auth-totp": "^2.0.0",
+    "source-map-support": "^0.5.21",
+    "uuidv4": "^6.2.13",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.3.1",
@@ -32,8 +42,11 @@
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/source-map-support": "^0.5.6",
+    "autoprefixer": "^10.4.17",
     "chokidar": "^3.5.3",
     "eslint": "^8.38.0",
+    "postcss": "^8.4.33",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.1.6"
   },
   "engines": {
