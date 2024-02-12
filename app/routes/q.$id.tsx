@@ -286,68 +286,123 @@ const renderQuestionByType = (
 ) => {
   switch (type) {
     case "text":
-      return question.textInput.longForm ? (
-        <TextArea
-          disabled={disabled}
-          name={question.id}
-          placeholder="Type answer here"
-          maxLength={question.textInput.maxChars}
-          onChange={(e) => setResponse({ text: e.target.value })}
-        />
-      ) : (
-        <TextInput
-          disabled={disabled}
-          type="text"
-          name={question.id}
-          placeholder="Type answer here"
-          className="sm:w-1/2"
-          maxLength={question.textInput.maxChars}
-          onChange={(e) => setResponse({ text: e.target.value })}
-        />
+      return (
+        <>
+          <p
+            className={
+              maximised ? "my-4 text-2xl text-center font-semibold" : undefined
+            }
+          >
+            {question.text}
+            {question.textInput.maxChars &&
+              ` (${question.textInput.maxChars} characters or less)`}
+          </p>
+          {question.textInput.longForm ? (
+            <TextArea
+              disabled={disabled}
+              name={question.id}
+              placeholder="Type answer here"
+              maxLength={question.textInput.maxChars}
+              onChange={(e) => setResponse({ text: e.target.value })}
+            />
+          ) : (
+            <TextInput
+              disabled={disabled}
+              type="text"
+              name={question.id}
+              placeholder="Type answer here"
+              className="sm:w-1/2"
+              maxLength={question.textInput.maxChars}
+              onChange={(e) => setResponse({ text: e.target.value })}
+            />
+          )}
+        </>
       );
     case "range":
       return (
-        <CustomRange
-          id={question.id}
-          min={question.rangeInput.min}
-          max={question.rangeInput.max}
-          step={question.rangeInput.steps}
-          disabled={disabled}
-          onChange={(value: number) => setResponse({ number: Number(value) })}
-        />
+        <>
+          <p
+            className={
+              maximised ? "my-4 text-2xl text-center font-semibold" : undefined
+            }
+          >
+            {question.text}
+            {` (Between ${question.rangeInput.min} and ${question.rangeInput.max})`}
+          </p>
+          <CustomRange
+            id={question.id}
+            min={question.rangeInput.min}
+            max={question.rangeInput.max}
+            step={question.rangeInput.steps}
+            disabled={disabled}
+            onChange={(value: number) => setResponse({ number: Number(value) })}
+          />
+        </>
       );
     case "number":
       return (
-        <TextInput
-          type="number"
-          className="sm:w-[5rem]"
-          disabled={disabled}
-          name={question.id}
-          min={question.numberInput.min}
-          max={question.numberInput.max}
-          onChange={(e) => setResponse({ number: Number(e.target.value) })}
-        />
+        <>
+          <p
+            className={
+              maximised ? "my-4 text-2xl text-center font-semibold" : undefined
+            }
+          >
+            {question.text}
+            {` (Between ${question.numberInput.min} and ${question.numberInput.max})`}
+          </p>
+          <TextInput
+            type="number"
+            className="sm:w-[5rem]"
+            disabled={disabled}
+            name={question.id}
+            min={question.numberInput.min}
+            max={question.numberInput.max}
+            onChange={(e) => setResponse({ number: Number(e.target.value) })}
+          />
+        </>
       );
     case "single-select":
       return (
-        <CustomRadioGroup
-          items={question.multipleChoice.answers}
-          disabled={disabled}
-          onChange={(answerId: string) => setResponse({ answerId })}
-        />
+        <>
+          <p
+            className={
+              maximised ? "my-4 text-2xl text-center font-semibold" : undefined
+            }
+          >
+            {question.text}
+            {` (Choose one)`}
+          </p>
+          <CustomRadioGroup
+            items={question.multipleChoice.answers}
+            disabled={disabled}
+            onChange={(answerId: string) => setResponse({ answerId })}
+          />
+        </>
       );
     case "multi-select":
       return (
-        <CustomCheckbox
-          items={question.multipleChoice.answers}
-          maxSelected={question.multipleChoice.maxSelect}
-          disabled={disabled}
-          onChange={(answerIds: string[]) =>
-            setResponse({
-              answers: answerIds.map((answerId: string) => ({ answerId })),
-            })
-          }
-        />
+        <>
+          <p
+            className={
+              maximised ? "my-4 text-2xl text-center font-semibold" : undefined
+            }
+          >
+            {question.text}
+            {question.multipleChoice.maxSelect
+              ? ` (Choose up to ${question.multipleChoice.maxSelect} options)`
+              : ` (Choose as many options as are applicable)`}
+          </p>
+          <CustomCheckbox
+            items={question.multipleChoice.answers}
+            maxSelected={question.multipleChoice.maxSelect}
+            disabled={disabled}
+            onChange={(answerIds: string[]) =>
+              setResponse({
+                answers: answerIds.map((answerId: string) => ({ answerId })),
+              })
+            }
+          />
+        </>
       );
     default:
       return null;
@@ -384,13 +439,6 @@ const Question = ({
           <TbMaximize className="mx-auto" />
         </button>
       )}
-      <p
-        className={
-          maximised ? "my-4 text-2xl text-center font-semibold" : undefined
-        }
-      >
-        {question.text}
-      </p>
       {renderQuestionByType(
         question.type,
         question,

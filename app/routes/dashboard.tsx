@@ -4,9 +4,11 @@ import {
   LoaderFunctionArgs,
   MetaFunction,
   json,
+  redirect,
 } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useSubmit } from "@remix-run/react";
 import { useState } from "react";
+import { MdDeleteOutline } from "react-icons/md";
 import {
   TbArrowsMaximize,
   TbArrowsMinimize,
@@ -16,6 +18,7 @@ import {
   TbLockOpen,
 } from "react-icons/tb";
 import IconTooltip from "~/components/UI/icon-tooltip";
+import { useDoubleCheck } from "~/hooks/use-double-check";
 import { authenticator } from "~/modules/auth/auth.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -49,7 +52,7 @@ export default () => {
   return (
     <div className="bg-white h-full w-full space-y-2">
       <p className="text-3xl text-center font-semibold">Dashboard</p>
-      <div className="bg-indigo-50 outline-1 outline-gray-300 ring-1 ring-inset ring-gray-300/50 shadow-inner rounded-md w-[95dvw] sm:w-2/3 mx-auto h-[65dvh] p-4 flex flex-col space-y-4 overflow-y-auto">
+      <div className="bg-indigo-50 outline-1 outline-gray-300 ring-1 ring-inset ring-gray-300/50 shadow-inner rounded-md w-[95dvw] sm:w-2/3 mx-auto h-[65dvh] p-2 flex flex-col space-y-4 overflow-y-auto">
         {result.length <= 0 && (
           <p className="text-center">
             No questionnaires found. Create a new questionnaire using the button
@@ -88,6 +91,8 @@ const Questionnaire = ({
   status: "open" | "closed";
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const { doubleCheck, getButtonProps } = useDoubleCheck();
+  const submit = useSubmit();
 
   const toSentenceCase = (text: string) => {
     return text.replace(/\.\s+([a-z])[^\.]|^(\s*[a-z])[^\.]/g, (s) =>
@@ -141,13 +146,45 @@ const Questionnaire = ({
           </div>
         </>
       )}
-      <p className="text-sm text-gray-600 mt-2 text-shadow w-fit">
-        {new Date(date).toLocaleString()}
-      </p>
+      <div className="relative">
+        <p className="text-sm text-gray-600 mt-2 text-shadow w-fit">
+          {new Date(date).toLocaleString()}
+        </p>
+        {expanded && (
+          <button
+            {...getButtonProps({
+              type: "button",
+              className: `absolute right-0 bottom-0 text-center w-fit mx-auto active:scale-95 transition transition-all duration-150 flex h-fit py-1 items-center justify-center rounded-md font-mediums text-white ${
+                doubleCheck
+                  ? "bg-red-500 hover:bg-red-700"
+                  : "bg-indigo-500 hover:bg-indigo-400"
+              }`,
+              onClick: () =>
+                doubleCheck &&
+                submit({ id }, { method: "POST", encType: "application/json" }),
+            })}
+          >
+            <MdDeleteOutline className="absolute left-2 top-1/2 -translate-y-1/2 text-lg" />
+            <p className="ml-7 mr-3 font-medium w-[3.5rem]">
+              {doubleCheck ? "Confirm" : "Delete"}
+            </p>
+          </button>
+        )}
+      </div>
     </div>
   );
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  return null;
+  const { id } = await request.json();
+  const prisma = new PrismaClient();
+  try {
+    await prisma.questionnaire.delete({ where: { id } });
+    return redirect(request.url);
+  } catch (error) {
+    throw new Response(
+      "Something went wrong when trying to delete this questionnaire.",
+      { status: 500 }
+    );
+  }
 }

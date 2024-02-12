@@ -31,7 +31,7 @@ export const FormInput = ({
   onChange?: (e: any) => void;
 }) => {
   return (
-    <div>
+    <div className="w-full">
       {!!label ? (
         <label
           htmlFor={name}

@@ -76,6 +76,13 @@ export const CreateForm = () => {
           <div>
             <Question
               question={question}
+              deleteQuestion={() => {
+                const qs = [
+                  ...questions.slice(0, qIndex),
+                  ...questions.slice(qIndex + 1),
+                ];
+                setQuestions(qs);
+              }}
               setQuestion={(data) => {
                 const qs = [
                   ...questions.slice(0, qIndex),
@@ -124,9 +131,11 @@ export const CreateForm = () => {
 };
 
 const Question = ({
+  deleteQuestion,
   setQuestion,
   question,
 }: {
+  deleteQuestion: () => void;
   setQuestion: (data: any) => void;
   question: any;
 }) => {
@@ -268,9 +277,10 @@ const Question = ({
 
   return (
     <div className="w-full mx-auto flex flex-col justify-center items-center">
-      <div className="w-full">
+      <div className="w-full flex flex-row">
         <FormInput
           type="text"
+          className="w-full flex-auto"
           placeholder="Question"
           value={data.title}
           onChange={(e) => {
@@ -279,6 +289,13 @@ const Question = ({
           }}
           required
         />
+        <button
+          type="button"
+          className="w-[2.4rem] ml-1 mx-auto active:scale-95 transition transition-all duration-150 flex h-[2.2rem] items-center justify-center rounded-md font-medium text-white bg-indigo-500 hover:bg-indigo-400"
+          onClick={deleteQuestion}
+        >
+          <MdClose className="mx-auto text-xl mt-[2px]" />
+        </button>
       </div>
       <div className="w-fit relative">
         <select
