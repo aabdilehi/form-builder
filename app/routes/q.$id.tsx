@@ -5,34 +5,14 @@ import {
   json,
   redirect,
 } from "@remix-run/node";
-import {
-  useLoaderData,
-  useNavigation,
-  Link,
-  Form,
-  useSubmit,
-} from "@remix-run/react";
-import { CreateForm } from "~/components/creator";
+import { useLoaderData, Link, Form, useSubmit } from "@remix-run/react";
 import { PrismaClient } from "@prisma/client";
 import { uuid } from "uuidv4";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { authenticator } from "~/modules/auth/auth.server";
 import { TextArea, TextInput } from "~/components/UI/input";
 import { Tooltip } from "~/components/UI/icon-tooltip";
 import { TbMaximize, TbMinimize } from "react-icons/tb";
-import {
-  MdArrowBackIosNew,
-  MdArrowForwardIos,
-  MdOutlineKeyboardArrowLeft,
-  MdOutlineKeyboardArrowRight,
-} from "react-icons/md";
-import { RoundedButton } from "~/components/UI/buttons";
 import { useDoubleCheck } from "~/hooks/use-double-check";
 import Carousel from "~/components/UI/carousel";
 
@@ -51,6 +31,10 @@ const CustomRadioGroup = ({
 }) => {
   const [checkedIndex, setCheckedIndex] = useState(0);
 
+  useEffect(() => {
+    onChange(items[checkedIndex].id);
+  }, [checkedIndex]);
+
   const renderItem = (
     id: string,
     item: { id: string; text: string },
@@ -59,7 +43,7 @@ const CustomRadioGroup = ({
     return (
       <label
         htmlFor={item.id}
-        className="text-slate-700 my-2 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-600 has-[:checked]:bg-indigo-50 grid text-left grid-cols-[1fr_auto] items-center gap-6 rounded-lg p-4 ring-1 ring-transparent hover:bg-slate-100 w-full sm:w-1/3 mx-auto"
+        className="text-slate-700 my-2 has-[:checked]:ring-indigo-200 has-[:checked]:text-indigo-600 has-[:checked]:bg-indigo-50 grid text-left grid-cols-[1fr_auto] items-center gap-6 rounded-lg p-4 ring-1 ring-transparent hover:bg-slate-100 w-full sm:w-1/3 mx-auto has-[:disabled]:bg-gray-300/50 has-[:disabled]:text-gray-400"
       >
         {item.text}
         <input
@@ -70,10 +54,9 @@ const CustomRadioGroup = ({
           value={item.text}
           onChange={() => {
             setCheckedIndex(index);
-            onChange(item.id);
           }}
-          defaultChecked={index === 0}
-          checked={index === checkedIndex}
+          defaultChecked={!disabled && index === 0}
+          checked={!disabled && index === checkedIndex}
           disabled={disabled}
         />
       </label>
@@ -502,7 +485,10 @@ const Questionnaire = ({
       className="h-full w-full mx-auto relative"
       onSubmit={(e) => {
         e.preventDefault();
-        submit(response, { method: "POST", encType: "application/json" });
+        submit(
+          { questionnaireId: id, response },
+          { method: "POST", encType: "application/json" }
+        );
       }}
     >
       {maximised ? (
@@ -670,8 +656,7 @@ export const action: ActionFunction = async ({
   const prisma = new PrismaClient();
   const session = await authenticator.isAuthenticated(request);
   const sessionId = session?.id ?? uuid();
-
-  const response = await request.json();
+  const { questionnaireId, response } = await request.json();
 
   // Very ugly but SQLite does not support createMany
   try {
@@ -691,6 +676,7 @@ export const action: ActionFunction = async ({
                 data: {
                   id: uuid(),
                   sessionId,
+                  questionnaireId,
                   questionId,
                   answerId: data.answerId,
                 },
@@ -703,6 +689,7 @@ export const action: ActionFunction = async ({
                     data: {
                       id: uuid(),
                       sessionId,
+                      questionnaireId,
                       questionId,
                       answerId: answer.answerId,
                     },
@@ -712,7 +699,13 @@ export const action: ActionFunction = async ({
               break;
             case "text":
               await prisma.response.create({
-                data: { id: uuid(), sessionId, questionId, text: data.text },
+                data: {
+                  id: uuid(),
+                  sessionId,
+                  questionnaireId,
+                  questionId,
+                  text: data.text,
+                },
               });
               break;
             case "number":
@@ -721,6 +714,7 @@ export const action: ActionFunction = async ({
                 data: {
                   id: uuid(),
                   sessionId,
+                  questionnaireId,
                   questionId,
                   number: data.number,
                 },
@@ -732,6 +726,6 @@ export const action: ActionFunction = async ({
     );
     return redirect("/");
   } catch (error) {
-    return json({ error });
+    throw new Error("Something went wrong with submitting your response.");
   }
 };

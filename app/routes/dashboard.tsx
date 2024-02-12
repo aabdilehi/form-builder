@@ -96,7 +96,7 @@ const Questionnaire = ({
   };
 
   return (
-    <div className="w-full p-4 rounded-md mx-auto my-auto bg-white shadow-lg transition transition-transform duration-150 ease-in-out transform space-y-2 hover:-translate-y-[3px]">
+    <div className="w-full p-4 rounded-md mx-auto bg-white shadow-lg transition transition-transform duration-150 ease-in-out transform space-y-2 hover:-translate-y-[3px]">
       <div className="flex flex-row items-center float-right space-x-2">
         <Link
           className="text-md font-medium text-indigo-400 hover:text-indigo-400/50 text-shadow mr-2"

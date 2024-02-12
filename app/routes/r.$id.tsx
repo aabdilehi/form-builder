@@ -21,6 +21,7 @@ import {
 import { Bar, Line, Pie } from "react-chartjs-2";
 import Carousel from "~/components/UI/carousel";
 import { filterCookie } from "~/cookies.server";
+import { authenticator } from "~/modules/auth/auth.server";
 
 Chart.register(
   ArcElement,
@@ -35,6 +36,9 @@ Chart.register(
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
   const prisma = new PrismaClient();
+  const user = await authenticator.isAuthenticated(request, {
+    failureRedirect: "/login",
+  });
 
   const questionnaire = await prisma.questionnaire.findUnique({
     where: {
@@ -43,6 +47,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     select: {
       id: true,
       title: true,
+      userId: true,
       questions: {
         select: {
           text: true,
@@ -60,6 +65,13 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
       },
     },
   });
+
+  if (questionnaire?.userId !== user?.id) {
+    // get them out if they are not the owner
+    // would be good to have a popup describing why they were booted out
+    // e.g. if the owner is unknowingly on a different account or something
+    return redirect("/dashboard");
+  }
 
   function parseResponses({
     text,
@@ -87,7 +99,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
         case "multi-select":
           // Count responses to each answer
           const answerText = answerIdToText[answerId];
-          if (!Object.hasOwn(result, answerId)) {
+          if (!Object.hasOwn(result, answerText)) {
             result[answerText] = 1;
           } else {
             result[answerText] += 1;
@@ -156,10 +168,11 @@ export default function Response() {
                 <div className="w- full mx-auto bg-white shadow-inner rounded-md ring-1 ring-gray-200">
                   <Line
                     data={{
-                      labels: [-100, 0, 100],
+                      labels:
+                        Object.values(formattedResponse[question.text]) ?? [],
                       datasets: [
                         {
-                          label: "Sales",
+                          label: "Value",
                           data:
                             Object.values(formattedResponse[question.text]) ??
                             [],
@@ -199,11 +212,11 @@ export default function Response() {
                           ticks: {
                             display: true,
                           },
-                          min:
+                          suggestedMin:
                             question.rangeInput?.min ??
                             question.numberInput?.min ??
                             undefined,
-                          max:
+                          suggestedMax:
                             question.rangeInput?.max ??
                             question.numberInput?.max ??
                             undefined,
@@ -225,7 +238,7 @@ export default function Response() {
               )}
               {(question.type == "single-select" ||
                 question.type == "multi-select") && (
-                <div className="w-1/3 mx-auto">
+                <div className="w-full min-h-[200px] h-max mx-auto">
                   <Pie
                     options={{
                       maintainAspectRatio: false,

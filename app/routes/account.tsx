@@ -51,7 +51,7 @@ export default function AdminIndex() {
 
   return (
     <div className="bg-white h-full w-full space-y-2">
-      <p className="text-3xl text-center font-semibold">Dashboard</p>
+      <p className="text-3xl text-center font-semibold">Account</p>
       <p className="text-2xl font-semibold text-center p-2">Account details</p>
       <div className="w-full mx-auto">
         <UsernameSection />

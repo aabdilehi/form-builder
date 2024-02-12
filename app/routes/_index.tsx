@@ -10,32 +10,34 @@ export const meta: MetaFunction = () => {
 
 export default function Index() {
   return (
-    <div className="h-full min-h-fit w-4/5 mx-auto">
-      <div className="text-center p-4 bg-indigo-50 ring-1 ring-indigo-300 rounded-md mx-auto">
+    <div className="h-full min-h-fit w-[95dvw] mx-auto">
+      <div className="text-center w-full max-h-[30dvh] overflow-y-auto p-4 bg-indigo-50 ring-1 ring-indigo-300 rounded-md mx-auto">
         <h1 className="text-center text-2xl font-semibold tracking-tight">
           Disclaimer
         </h1>
         <p>
           This is a portfolio project showcasing a questionnaire/form builder.
-          It's designed to demonstrate some skills in web development, and is{" "}
-          <strong>not</strong> intended for production use.{" "}
+          It's designed to demonstrate some skills in web development (not web
+          design), and is <strong>not</strong> intended for use as if it were a
+          typical website.{" "}
           <strong>
-            Assume that security is very weak and show appropriate caution
-          </strong>
-          . I would love to build a demo that doesn't require sign-up eventually
+            Assume that security is very weak and show appropriate caution.
+          </strong>{" "}
+          I would love to build a demo that doesn't require sign-up eventually
           but, for now, I would suggest using a temporary email for logging in
           such as those found at{" "}
           <a
             className="text-indigo-800 hover:text-indigo-500 font-medium"
-            href="https://www.temp-mail.org"
+            href="https://mail.tm"
           >
-            temp-mail.org
+            mail.tm
           </a>{" "}
-          or just make sure to delete your account after you are done checking
-          this out. Check out the Github repo for this project{" "}
+          (though I would not recommend it for any other use case) or just make
+          sure to delete your account after you are done checking this out.
+          Check out the Github repo for this project{" "}
           <a
             className="text-indigo-800 hover:text-indigo-500 font-medium"
-            href="#"
+            href="https://github.com/aabdilehi/form-builder"
           >
             here
           </a>
